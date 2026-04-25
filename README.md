@@ -1,6 +1,5 @@
 # Multi-State PatchCore Audio
-
-code submission for industrial audio anomaly detection under real-world noise.
+This project was developed in collaboration with Brose SE and the Cognitive Systems Chair at the University of Bamberg, using industrial machine-acoustic data for anomaly detection under real-world noise.
 
 This repository contains the code used to evaluate a PatchCore-style anomaly detection pipeline for industrial machine acoustics and compare it against a supervised CNN14-based classification baseline. The project focuses on short waveform windows extracted from annotated industrial audio recordings. Both pipelines operate on raw waveform windows. The CNN14/PANNs frontend computes log-Mel representations internally.
 
@@ -227,5 +226,3 @@ outputs/
 ```
 
 Generated outputs, model weights, embeddings, and checkpoints are not tracked by Git. The full industrial dataset is not included in this repository. Only a small anonymized sample dataset is provided for code verification. The pretrained CNN14 checkpoint is also not included and must be placed manually at `external/checkpoints/Cnn14_mAP=0.431.pth`.
-
-For privacy, institution information has been removed.
