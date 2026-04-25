@@ -1,0 +1,167 @@
+"""
+create_metadata_csv.py
+-------------------------------
+
+Create metadata CSV files for extracted waveform windows.
+
+This script is shared by both the 0.2 s and 0.4 s preprocessing pipelines.
+Use --dataset_root to select the corresponding extracted-window dataset.
+
+The output CSV contains the following columns:
+- path
+- label
+- class_name
+- file_id
+- split
+
+Expected input structure:
+- <dataset_root>/File_split_CSVs/file_split.csv
+- <dataset_root>/Class_1/*.wav
+- <dataset_root>/Class_2/*.wav
+- <dataset_root>/Class_4/*.wav
+
+Outputs:
+- <dataset_root>/File_split_CSVs/metadata_waveform.csv
+- <dataset_root>/File_split_CSVs/train_metadata_waveform.csv
+- <dataset_root>/File_split_CSVs/val_metadata_waveform.csv
+- <dataset_root>/File_split_CSVs/test_metadata_waveform.csv
+
+Example usage for 0.2 s windows:
+    python data_preprocessing/create_waveform_metadata_csv.py \
+        --dataset_root outputs/sample_windows_0p2s_3class
+
+Example usage for 0.4 s windows:
+    python data_preprocessing/create_waveform_metadata_csv.py \
+        --dataset_root outputs/sample_windows_0p4s_3class
+"""
+
+from pathlib import Path
+import argparse
+
+import pandas as pd
+
+
+# =========================================================
+# PATHS
+# =========================================================
+parser = argparse.ArgumentParser(
+    description="Create metadata CSV files for extracted waveform windows."
+)
+
+parser.add_argument(
+    "--dataset_root",
+    type=Path,
+    default=Path("outputs/sample_windows_0p2s_3class"),
+    help="Dataset root containing Class_1, Class_2, Class_4, and File_split_CSVs.",
+)
+
+args = parser.parse_args()
+
+DATASET = args.dataset_root
+CSV_DIR = DATASET / "File_split_CSVs"
+
+SPLIT_CSV = CSV_DIR / "file_split.csv"
+
+OUT_CSV = CSV_DIR / "metadata_waveform.csv"
+TRAIN_OUT_CSV = CSV_DIR / "train_metadata_waveform.csv"
+VAL_OUT_CSV = CSV_DIR / "val_metadata_waveform.csv"
+TEST_OUT_CSV = CSV_DIR / "test_metadata_waveform.csv"
+
+
+# =========================================================
+# CLASS LABELS
+# =========================================================
+CLASS_INFO = {
+    "Class_1": 0,
+    "Class_2": 1,
+    "Class_4": 2,
+}
+
+
+# =========================================================
+# HELPER
+# =========================================================
+def extract_file_id_from_name(stem: str) -> int:
+    """
+    Extract the file_id from a filename stem of the form:
+    Class_2_100_46947_0238
+
+    For example:
+    Class_2_100_46947_0238 -> 100
+    """
+    parts = stem.split("_")
+    return int(parts[2])
+
+
+# =========================================================
+# LOAD FILE SPLIT
+# =========================================================
+split_df = pd.read_csv(SPLIT_CSV)
+fileid_to_split = dict(zip(split_df["file_id"], split_df["split"]))
+
+
+# =========================================================
+# BUILD METADATA
+# =========================================================
+rows = []
+
+for class_name, label in CLASS_INFO.items():
+    class_dir = DATASET / class_name
+
+    if not class_dir.exists():
+        raise FileNotFoundError(f"Missing class folder: {class_dir}")
+
+    for wav_path in sorted(class_dir.glob("*.wav")):
+        file_id = extract_file_id_from_name(wav_path.stem)
+
+        if file_id not in fileid_to_split:
+            raise ValueError(
+                f"file_id={file_id} not found in split CSV."
+            )
+
+        split = fileid_to_split[file_id]
+
+        rows.append(
+            {
+                "path": str(wav_path),
+                "label": label,
+                "class_name": class_name,
+                "file_id": file_id,
+                "split": split,
+            }
+        )
+
+df = pd.DataFrame(rows)
+
+
+# =========================================================
+# SAVE FULL METADATA CSV
+# =========================================================
+df.to_csv(OUT_CSV, index=False)
+
+
+# =========================================================
+# SAVE SPLIT-SPECIFIC METADATA CSV FILES
+# =========================================================
+train_df = df[df["split"] == "train"].copy()
+val_df = df[df["split"] == "val"].copy()
+test_df = df[df["split"] == "test"].copy()
+
+train_df.to_csv(TRAIN_OUT_CSV, index=False)
+val_df.to_csv(VAL_OUT_CSV, index=False)
+test_df.to_csv(TEST_OUT_CSV, index=False)
+
+
+# =========================================================
+# REPORT
+# =========================================================
+print(f"Metadata CSV saved to: {OUT_CSV}")
+print(f"Train metadata CSV saved to: {TRAIN_OUT_CSV}")
+print(f"Val metadata CSV saved to: {VAL_OUT_CSV}")
+print(f"Test metadata CSV saved to: {TEST_OUT_CSV}")
+
+print("\nSamples per split:")
+print(df["split"].value_counts())
+
+print("\nSamples per class:")
+print(df["class_name"].value_counts())
