@@ -223,8 +223,8 @@ def main() -> None:
     # =========================================================
     # DATA
     # =========================================================
-    train_ds = WaveformDataset(train_csv, sample_rate=25600)
-    val_ds = WaveformDataset(val_csv, sample_rate=25600)
+    train_ds = WaveformDataset(train_csv, sample_rate=16000)
+    val_ds = WaveformDataset(val_csv, sample_rate=16000)
 
     train_loader = DataLoader(
         train_ds,
