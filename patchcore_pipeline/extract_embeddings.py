@@ -114,7 +114,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--num_workers", type=int, default=0)
-    parser.add_argument("--sample_rate", type=int, default=25600)
+    parser.add_argument("--sample_rate", type=int, default=16000)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--l2_normalize", type=int, default=1)
 
