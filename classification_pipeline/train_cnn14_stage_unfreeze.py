@@ -1,5 +1,5 @@
 """
-train_cnn14_stage_unfreeze_weightedloss.py
+train_cnn14_stage_unfreeze.py
 ------------------------------------------
 
 Train a truncated CNN14 classifier for short industrial audio waveform windows.
