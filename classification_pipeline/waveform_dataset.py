@@ -48,7 +48,7 @@ class WaveformDataset(Dataset):
             Expected waveform sampling rate.
     """
 
-    def __init__(self, metadata, sample_rate=25600):
+    def __init__(self, metadata, sample_rate=16000):
         if isinstance(metadata, (str, Path)):
             self.df = pd.read_csv(metadata)
         elif isinstance(metadata, pd.DataFrame):
