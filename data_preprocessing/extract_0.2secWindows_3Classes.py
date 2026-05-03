@@ -92,9 +92,9 @@ CLASS_FOLDERS = {
 
 # We resample all recordings to a fixed sampling rate to ensure
 # consistent temporal resolution across files.
-SR = 25600
+SR = 16000
 
-# Window configuration: 0.2 s = 5120 samples at 25.6 kHz.
+# Window configuration: 0.2 s = 3200 samples at 16 kHz.
 WIN_SEC = 0.2
 WIN_SAMP = int(WIN_SEC * SR)
 
@@ -211,8 +211,13 @@ for file_id, group in df.groupby("File_name"):
         print(f"[WARN] Missing wav file for File_name={file_id}")
         continue
 
-    # Load waveform in mono at the target sampling rate.
+    # Load waveform in mono at the target sampling rate and peak-normalize it.
     y, _ = librosa.load(wav_path, sr=SR, mono=True)
+
+    peak = np.max(np.abs(y))
+    if peak > 0:
+        y = y / peak
+
     y_len = len(y)
 
     # --------------------------------------------------------
