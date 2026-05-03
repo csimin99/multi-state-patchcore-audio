@@ -65,12 +65,12 @@ class CNN14TruncatedFineTune(nn.Module):
         # 1) Load pretrained CNN14
         # --------------------------------------------------
         self.cnn14 = Cnn14(
-            sample_rate=25600,
-            window_size=1024,
-            hop_size=320,
+            sample_rate=16000,
+            window_size=512,
+            hop_size=160,
             mel_bins=64,
             fmin=50,
-            fmax=14000,
+            fmax=8000,
             classes_num=527,
         )
 
