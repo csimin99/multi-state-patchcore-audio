@@ -480,7 +480,7 @@ def main() -> None:
     # =========================================================
     df_meta = pd.read_csv(test_csv)
 
-    test_ds = WaveformDataset(test_csv, sample_rate=25600)
+    test_ds = WaveformDataset(test_csv, sample_rate=16000)
 
     test_loader = DataLoader(
         test_ds,
